@@ -1,4 +1,5 @@
 import { ref } from 'vue-demi'
+import { tryOnMounted } from '../../shared/tryOnMounted'
 import { useEventListener } from '../useEventListener'
 import { ConfigurableWindow, defaultWindow } from '../_configurable'
 
@@ -19,12 +20,13 @@ export function useWindowScroll({ window = defaultWindow }: ConfigurableWindow =
   const x = ref(window.pageXOffset)
   const y = ref(window.pageYOffset)
 
-  useEventListener(
-    'scroll',
-    () => {
-      x.value = window.pageXOffset
-      y.value = window.pageYOffset
-    },
+  const updateScroll = () => {
+    x.value = window.pageXOffset
+    y.value = window.pageYOffset
+  }
+
+  tryOnMounted(updateScroll)
+  useEventListener(window, 'scroll', updateScroll,
     {
       capture: false,
       passive: true,
