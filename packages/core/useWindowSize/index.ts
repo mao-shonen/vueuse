@@ -1,4 +1,5 @@
 import { ref } from 'vue-demi'
+import { tryOnMounted } from '../../shared/tryOnMounted'
 import { useEventListener } from '../useEventListener'
 import { ConfigurableWindow, defaultWindow } from '../_configurable'
 
@@ -23,10 +24,13 @@ export function useWindowSize({ window = defaultWindow, initialWidth = Infinity,
   const width = ref(window.innerWidth)
   const height = ref(window.innerHeight)
 
-  useEventListener('resize', () => {
+  const updateSize = () => {
     width.value = window.innerWidth
     height.value = window.innerHeight
-  }, { passive: true })
+  }
+
+  tryOnMounted(updateSize)
+  useEventListener(window, 'resize', updateSize, { passive: true })
 
   return { width, height }
 }
