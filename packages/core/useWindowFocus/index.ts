@@ -1,4 +1,5 @@
 import { Ref, ref } from 'vue-demi'
+import { tryOnMounted } from '../../shared/tryOnMounted'
 import { useEventListener } from '../useEventListener'
 import { ConfigurableWindow, defaultWindow } from '../_configurable'
 
@@ -14,13 +15,13 @@ export function useWindowFocus({ window = defaultWindow }: ConfigurableWindow = 
 
   const focused = ref(window.document.hasFocus())
 
-  useEventListener(window, 'blur', () => {
-    focused.value = false
-  })
+  const updateState = (state?: boolean) => {
+    focused.value = state ?? window.document.hasFocus()
+  }
 
-  useEventListener(window, 'focus', () => {
-    focused.value = true
-  })
+  tryOnMounted(updateState)
+  useEventListener(window, 'blur', () => updateState(false))
+  useEventListener(window, 'focus', () => updateState(true))
 
   return focused
 }
